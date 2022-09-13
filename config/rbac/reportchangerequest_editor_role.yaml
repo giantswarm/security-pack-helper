@@ -1,0 +1,24 @@
+# permissions for end users to edit reportchangerequests.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: reportchangerequest-editor-role
+rules:
+- apiGroups:
+  - kyverno.io.giantswarm
+  resources:
+  - reportchangerequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - kyverno.io.giantswarm
+  resources:
+  - reportchangerequests/status
+  verbs:
+  - get

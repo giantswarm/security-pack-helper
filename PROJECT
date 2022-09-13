@@ -3,4 +3,14 @@ layout:
 - go.kubebuilder.io/v3
 projectName: security-pack-helper
 repo: github.com/giantswarm/security-pack-helper
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: giantswarm
+  group: kyverno.io
+  kind: ReportChangeRequest
+  path: github.com/giantswarm/security-pack-helper/api/v1alpha2
+  version: v1alpha2
 version: "3"

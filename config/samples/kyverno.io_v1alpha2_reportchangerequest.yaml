@@ -1,0 +1,6 @@
+apiVersion: kyverno.io.giantswarm/v1alpha2
+kind: ReportChangeRequest
+metadata:
+  name: reportchangerequest-sample
+spec:
+  # TODO(user): Add fields here

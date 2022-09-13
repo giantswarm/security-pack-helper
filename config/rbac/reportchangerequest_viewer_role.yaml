@@ -1,0 +1,20 @@
+# permissions for end users to view reportchangerequests.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: reportchangerequest-viewer-role
+rules:
+- apiGroups:
+  - kyverno.io.giantswarm
+  resources:
+  - reportchangerequests
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - kyverno.io.giantswarm
+  resources:
+  - reportchangerequests/status
+  verbs:
+  - get
