@@ -9,6 +9,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	kyvernov1alpha2 "github.com/kyverno/kyverno/api/kyverno/v1alpha2"
+	versioned "github.com/kyverno/kyverno/pkg/client/clientset/versioned"
+	api "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/kyverno/v1alpha2"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -45,12 +47,16 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 	r.logger.Debugf(ctx, "Interval: %d", r.flag.Interval)
 	r.logger.Debugf(ctx, "RCR Limit: %d", r.flag.RCRLimit)
 
-	var k8sClient kubernetes.Interface
+	var restConfig *rest.Config
 	{
-		config, err := rest.InClusterConfig()
+		restConfig, err = rest.InClusterConfig()
 		if err != nil {
 			return microerror.Mask(err)
 		}
+	}
+
+	var k8sClient kubernetes.Interface
+	{
 
 		c := k8sclient.ClientsConfig{
 			Logger: r.logger,
@@ -58,7 +64,7 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 				//	v1alpha2.AddToScheme,
 				kyvernov1alpha2.AddToScheme,
 			},
-			RestConfig: config,
+			RestConfig: restConfig,
 		}
 
 		clients, err := k8sclient.NewClients(c)
@@ -69,9 +75,19 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 		k8sClient = clients.K8sClient()
 	}
 
+	var kyvernoClient api.KyvernoV1alpha2Interface
+	{
+		kyverno, err := versioned.NewForConfig(restConfig)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		kyvernoClient = kyverno.KyvernoV1alpha2()
+	}
+
 	rcrCleaner, err := cleaner.NewRCRCleaner(cleaner.Config{
 		Logger:    r.logger,
 		K8sClient: k8sClient,
+		KClient:   kyvernoClient,
 		RCRLimit:  r.flag.RCRLimit,
 	})
 	if err != nil {

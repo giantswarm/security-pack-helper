@@ -13,7 +13,8 @@ import (
 type Config struct {
 	Logger    micrologger.Logger
 	K8sClient kubernetes.Interface
-	KClient   api.ReportChangeRequestInterface
+	// KClient   api.ReportChangeRequestInterface
+	KClient api.KyvernoV1alpha2Interface
 
 	RCRLimit int
 }
