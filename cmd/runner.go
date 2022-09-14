@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	kyvernov1alpha2 "github.com/kyverno/kyverno/api/kyverno/v1alpha2"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -52,9 +53,12 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 		}
 
 		c := k8sclient.ClientsConfig{
-			Logger:        r.logger,
-			SchemeBuilder: k8sclient.SchemeBuilder{},
-			RestConfig:    config,
+			Logger: r.logger,
+			SchemeBuilder: k8sclient.SchemeBuilder{
+				//	v1alpha2.AddToScheme,
+				kyvernov1alpha2.AddToScheme,
+			},
+			RestConfig: config,
 		}
 
 		clients, err := k8sclient.NewClients(c)
@@ -75,7 +79,13 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 	}
 
 	for {
-		if rcrCleaner.Check(ctx) {
+		ok, err := rcrCleaner.Check(ctx)
+		if err != nil {
+			r.logger.Errorf(ctx, err, "Error listing ReportChangeRequests")
+			// Next loop.
+			continue
+		}
+		if ok {
 			r.logger.Debugf(ctx, "ReportChangeRequests are below threshold")
 		} else {
 			r.logger.Debugf(ctx, "Deleting ReportChangeRequests")

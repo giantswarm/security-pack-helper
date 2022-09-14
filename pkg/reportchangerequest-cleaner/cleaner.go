@@ -5,12 +5,15 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	api "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/kyverno/v1alpha2"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
 type Config struct {
 	Logger    micrologger.Logger
 	K8sClient kubernetes.Interface
+	KClient   api.ReportChangeRequestInterface
 
 	RCRLimit int
 }
@@ -18,6 +21,7 @@ type Config struct {
 type RCRCleaner struct {
 	logger    micrologger.Logger
 	k8sClient kubernetes.Interface
+	kClient   api.ReportChangeRequestInterface
 
 	rcrLimit int
 }
@@ -42,9 +46,23 @@ func NewRCRCleaner(config Config) (*RCRCleaner, error) {
 	}, nil
 }
 
-func (r *RCRCleaner) Check(ctx context.Context) bool {
+func (r *RCRCleaner) Check(ctx context.Context) (bool, error) {
 	// Check RCRs are under configured limit
-	return false
+	rcrs, err := r.kClient.List(ctx, v1.ListOptions{})
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	rcrCount := len(rcrs.Items)
+
+	r.logger.Debugf(ctx, "found %d ReportChangeRequests", rcrCount)
+
+	if rcrCount > r.rcrLimit {
+		// We are over the limit. Fail the check.
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (r *RCRCleaner) DeleteRCRs(ctx context.Context) error {
