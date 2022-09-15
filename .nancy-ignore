@@ -1,0 +1,2 @@
+# Hashicorp consul/api and /sdk are not intended for public use anymore. Waiting for dependencies to move away.
+CVE-2022-29153 until=2023-09-15

@@ -64,3 +64,11 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
+
+replace (
+	github.com/hashicorp/vault/api v1.5.0 => github.com/hashicorp/vault/api v1.9.8
+	github.com/hashicorp/vault/sdk v1.5.0 => github.com/hashicorp/vault/sdk v1.9.8
+	github.com/miekg/dns v1.0.14 => github.com/miekg/dns v1.1.50
+	github.com/pkg/sftp v1.10.1 => github.com/pkg/sftp v1.13.5
+	github.com/sigstore/cosign v1.9.0 => github.com/sigstore/cosign v1.10.1
+)
