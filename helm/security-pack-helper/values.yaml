@@ -7,6 +7,15 @@ image:
   tag: v0.0.1
   pullPolicy: IfNotPresent
 
+pod:
+  user:
+    id: 1000
+  group:
+    id: 1000
+
+psp:
+  enabled: true
+
 resources:
   limits:
     cpu: 200m
@@ -14,9 +23,6 @@ resources:
   requests:
     cpu: 200m
     memory: 200Mi
-
-psp:
-  enabled: true
 
 # Pod securityContext
 podSecurityContext:
