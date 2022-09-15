@@ -1,6 +1,6 @@
 module github.com/giantswarm/security-pack-helper
 
-go 1.17
+go 1.18
 
 require (
 	github.com/giantswarm/k8sclient/v7 v7.0.1
