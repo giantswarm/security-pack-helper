@@ -1,8 +1,10 @@
 name: security-pack-helper
 serviceType: managed
 
+registry:
+  domain: docker.io
+
 image:
-  registry: docker.io
   name: giantswarm/security-pack-helper
   tag: v0.0.1
   pullPolicy: IfNotPresent
