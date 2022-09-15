@@ -16,9 +16,9 @@ workflows:
       - architect/push-to-docker:
           context: "architect"
           name: push-security-pack-helper-to-docker
-          image: "docker.io/giantswarm/security-pack-helper"
-          username_envar: "DOCKER_USERNAME"
-          password_envar: "DOCKER_PASSWORD"
+          image: "quay.io/giantswarm/security-pack-helper"
+          username_envar: "QUAY_USERNAME"
+          password_envar: "QUAY_PASSWORD"
           requires:
             - go-build
           # Needed to trigger job also on git tag.
