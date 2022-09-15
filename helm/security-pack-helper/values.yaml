@@ -49,3 +49,6 @@ securityPackHelper:
 
   # Maximum ReportChangeRequests which will be allowed in the cluster before being deleted.
   rcrLimit: 2000
+
+  # The namespace where ReportChangeRequests will be watched.
+  rcrNamespace: "kyverno"

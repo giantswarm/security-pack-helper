@@ -16,15 +16,18 @@ type Config struct {
 	// KClient   api.ReportChangeRequestInterface
 	KClient api.KyvernoV1alpha2Interface
 
-	RCRLimit int
+	RCRLimit     int
+	RCRNamespace string
 }
 
 type RCRCleaner struct {
 	logger    micrologger.Logger
 	k8sClient kubernetes.Interface
-	kClient   api.ReportChangeRequestInterface
+	// kClient   api.ReportChangeRequestInterface
+	kClient api.KyvernoV1alpha2Interface
 
-	rcrLimit int
+	rcrLimit     int
+	rcrNamespace string
 }
 
 func NewRCRCleaner(config Config) (*RCRCleaner, error) {
@@ -36,20 +39,29 @@ func NewRCRCleaner(config Config) (*RCRCleaner, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 
+	if config.KClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.KClient must not be empty", config)
+	}
+
 	if config.RCRLimit <= 0 {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RCRLimit must be greater than 0", config)
+	}
+
+	if config.RCRNamespace == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.RCRNamespace must not be empty", config)
 	}
 
 	return &RCRCleaner{
 		logger:    config.Logger,
 		k8sClient: config.K8sClient,
+		kClient:   config.KClient,
 		rcrLimit:  config.RCRLimit,
 	}, nil
 }
 
 func (r *RCRCleaner) Check(ctx context.Context) (bool, error) {
 	// Check RCRs are under configured limit
-	rcrs, err := r.kClient.List(ctx, v1.ListOptions{})
+	rcrs, err := r.kClient.ReportChangeRequests(r.rcrNamespace).List(ctx, v1.ListOptions{})
 	if err != nil {
 		return false, microerror.Mask(err)
 	}

@@ -46,6 +46,7 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 
 	r.logger.Debugf(ctx, "Interval: %d", r.flag.Interval)
 	r.logger.Debugf(ctx, "RCR Limit: %d", r.flag.RCRLimit)
+	r.logger.Debugf(ctx, "RCR Namespace: %d", r.flag.RCRNamespace)
 
 	var restConfig *rest.Config
 	{
@@ -85,10 +86,11 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 	}
 
 	rcrCleaner, err := cleaner.NewRCRCleaner(cleaner.Config{
-		Logger:    r.logger,
-		K8sClient: k8sClient,
-		KClient:   kyvernoClient,
-		RCRLimit:  r.flag.RCRLimit,
+		Logger:       r.logger,
+		K8sClient:    k8sClient,
+		KClient:      kyvernoClient,
+		RCRLimit:     r.flag.RCRLimit,
+		RCRNamespace: r.flag.RCRNamespace,
 	})
 	if err != nil {
 		return microerror.Mask(err)
