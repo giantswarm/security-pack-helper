@@ -1,12 +1,11 @@
 name: security-pack-helper
 serviceType: managed
 
-# project:
-#   branch: "[[ .Branch ]]"
-#   commit: "[[ .SHA ]]"
-
 image:
   registry: docker.io
   name: giantswarm/security-pack-helper
   tag: v0.0.1
   pullPolicy: IfNotPresent
+
+# The time in seconds after which periodic checks will be run again.
+interval: 60
