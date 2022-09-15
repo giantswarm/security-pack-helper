@@ -20,5 +20,5 @@ room for such suffix.
 {{- end -}}
 
 {{- define "resource.default.namespace" -}}
-kube-system
+{{ .Release.Namespace }}
 {{- end -}}
