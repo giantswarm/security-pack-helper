@@ -79,20 +79,10 @@ func (r *RCRCleaner) Check(ctx context.Context) (bool, error) {
 }
 
 func (r *RCRCleaner) DeleteRCRs(ctx context.Context) error {
-	// podList, err := r.k8sClient.CoreV1().Pods(r.namespace).List(ctx, v1.ListOptions{
-	// 	LabelSelector: r.labelSelector,
-	// 	FieldSelector: fmt.Sprintf("spec.nodeName=%s", r.nodeName),
-	// })
-	// if err != nil {
-	// 	return microerror.Mask(err)
-	// }
-
-	// pod := podList.Items[0]
-
-	// err = r.k8sClient.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, v1.DeleteOptions{})
-	// if err != nil {
-	// 	return microerror.Mask(err)
-	// }
+	err := r.kClient.ReportChangeRequests(r.rcrNamespace).DeleteCollection(ctx, v1.DeleteOptions{}, v1.ListOptions{})
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	return nil
 }
