@@ -6,7 +6,6 @@ registry:
 
 image:
   name: giantswarm/security-pack-helper
-  tag: v0.0.1
   pullPolicy: IfNotPresent
 
 pod:
