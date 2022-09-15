@@ -5,14 +5,11 @@ import (
 	"io"
 	"time"
 
-	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	kyvernov1alpha2 "github.com/kyverno/kyverno/api/kyverno/v1alpha2"
 	versioned "github.com/kyverno/kyverno/pkg/client/clientset/versioned"
 	api "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/kyverno/v1alpha2"
 	"github.com/spf13/cobra"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
 	cleaner "github.com/giantswarm/security-pack-helper/pkg/reportchangerequest-cleaner"
@@ -46,7 +43,7 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 
 	r.logger.Debugf(ctx, "Interval: %d", r.flag.Interval)
 	r.logger.Debugf(ctx, "RCR Limit: %d", r.flag.RCRLimit)
-	r.logger.Debugf(ctx, "RCR Namespace: %d", r.flag.RCRNamespace)
+	r.logger.Debugf(ctx, "RCR Namespace: %s", r.flag.RCRNamespace)
 
 	var restConfig *rest.Config
 	{
@@ -54,26 +51,6 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 		if err != nil {
 			return microerror.Mask(err)
 		}
-	}
-
-	var k8sClient kubernetes.Interface
-	{
-
-		c := k8sclient.ClientsConfig{
-			Logger: r.logger,
-			SchemeBuilder: k8sclient.SchemeBuilder{
-				//	v1alpha2.AddToScheme,
-				kyvernov1alpha2.AddToScheme,
-			},
-			RestConfig: restConfig,
-		}
-
-		clients, err := k8sclient.NewClients(c)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		k8sClient = clients.K8sClient()
 	}
 
 	var kyvernoClient api.KyvernoV1alpha2Interface
@@ -87,7 +64,6 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 
 	rcrCleaner, err := cleaner.NewRCRCleaner(cleaner.Config{
 		Logger:       r.logger,
-		K8sClient:    k8sClient,
 		KClient:      kyvernoClient,
 		RCRLimit:     r.flag.RCRLimit,
 		RCRNamespace: r.flag.RCRNamespace,

@@ -7,13 +7,10 @@ import (
 	"github.com/giantswarm/micrologger"
 	api "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/kyverno/v1alpha2"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 type Config struct {
-	Logger    micrologger.Logger
-	K8sClient kubernetes.Interface
-	// KClient   api.ReportChangeRequestInterface
+	Logger  micrologger.Logger
 	KClient api.KyvernoV1alpha2Interface
 
 	RCRLimit     int
@@ -21,9 +18,7 @@ type Config struct {
 }
 
 type RCRCleaner struct {
-	logger    micrologger.Logger
-	k8sClient kubernetes.Interface
-	// kClient   api.ReportChangeRequestInterface
+	logger  micrologger.Logger
 	kClient api.KyvernoV1alpha2Interface
 
 	rcrLimit     int
@@ -33,10 +28,6 @@ type RCRCleaner struct {
 func NewRCRCleaner(config Config) (*RCRCleaner, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
-	}
-
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 
 	if config.KClient == nil {
@@ -52,10 +43,9 @@ func NewRCRCleaner(config Config) (*RCRCleaner, error) {
 	}
 
 	return &RCRCleaner{
-		logger:    config.Logger,
-		k8sClient: config.K8sClient,
-		kClient:   config.KClient,
-		rcrLimit:  config.RCRLimit,
+		logger:   config.Logger,
+		kClient:  config.KClient,
+		rcrLimit: config.RCRLimit,
 	}, nil
 }
 
