@@ -50,6 +50,7 @@ func NewRCRCleaner(config Config) (*RCRCleaner, error) {
 	}, nil
 }
 
+// Retrieves the list of ReportChangeRequests in the cluster and deletes them if the list exceeds the configured threshold.
 func (r *RCRCleaner) CheckAndDelete(ctx context.Context) error {
 	rcrs, err := r.listRCRs(ctx)
 	if err != nil {
@@ -75,25 +76,7 @@ func (r *RCRCleaner) CheckAndDelete(ctx context.Context) error {
 	return nil
 }
 
-// func (r *RCRCleaner) Check(ctx context.Context) (bool, error) {
-// 	// Check RCRs are under configured limit
-// 	rcrs, err := r.kClient.ReportChangeRequests(r.rcrNamespace).List(ctx, metav1.ListOptions{})
-// 	if err != nil {
-// 		return false, microerror.Mask(err)
-// 	}
-
-// 	rcrCount := len(rcrs.Items)
-
-// 	r.logger.Debugf(ctx, "found %d ReportChangeRequests", rcrCount)
-
-// 	if rcrCount > r.rcrLimit {
-// 		// We are over the limit. Fail the check.
-// 		return false, nil
-// 	}
-
-// 	return true, nil
-// }
-
+// Deletes a list of ReportChangeRequests. Does not error if individual deletions fail.
 func (r *RCRCleaner) deleteRCRs(ctx context.Context, rcrs *v1alpha2.ReportChangeRequestList) error {
 
 	for _, rcr := range rcrs.Items {
@@ -107,6 +90,7 @@ func (r *RCRCleaner) deleteRCRs(ctx context.Context, rcrs *v1alpha2.ReportChange
 	return nil
 }
 
+// Lists the ReportChangeRequests in the cluster in the configured watched namespace.
 func (r *RCRCleaner) listRCRs(ctx context.Context) (*v1alpha2.ReportChangeRequestList, error) {
 	rcrs, err := r.kClient.ReportChangeRequests(r.rcrNamespace).List(ctx, metav1.ListOptions{})
 	if err != nil {

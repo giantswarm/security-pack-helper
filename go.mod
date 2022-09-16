@@ -65,5 +65,5 @@ replace (
 	github.com/hashicorp/vault/sdk v0.5.0 => github.com/hashicorp/vault/sdk v1.9.8
 	github.com/miekg/dns v1.0.14 => github.com/miekg/dns v1.1.50
 	github.com/pkg/sftp v1.10.1 => github.com/pkg/sftp v1.13.5
-	github.com/sigstore/cosign v1.9.0 => github.com/sigstore/cosign v1.10.1
+	github.com/sigstore/cosign v1.9.0 => github.com/sigstore/cosign v1.12.0
 )
