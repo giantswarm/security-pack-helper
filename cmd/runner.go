@@ -69,7 +69,10 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 
 	var kyvernoDClient dclient.Interface
 	{
-		dclient.NewClient(restConfig, 15*time.Minute, stopCh)
+		kyvernoDClient, err = dclient.NewClient(restConfig, 15*time.Minute, stopCh)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	rcrCleaner, err := cleaner.NewRCRCleaner(cleaner.Config{
