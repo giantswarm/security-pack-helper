@@ -7,20 +7,23 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/kyverno/kyverno/api/kyverno/v1alpha2"
 	api "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/kyverno/v1alpha2"
+	dclient "github.com/kyverno/kyverno/pkg/dclient"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type Config struct {
-	Logger  micrologger.Logger
-	KClient api.KyvernoV1alpha2Interface
+	Logger         micrologger.Logger
+	KyvernoClient  api.KyvernoV1alpha2Interface
+	KyvernoDClient dclient.Interface
 
 	RCRLimit     int
 	RCRNamespace string
 }
 
 type RCRCleaner struct {
-	logger  micrologger.Logger
-	kClient api.KyvernoV1alpha2Interface
+	logger         micrologger.Logger
+	kyvernoClient  api.KyvernoV1alpha2Interface
+	kyvernoDClient dclient.Interface
 
 	rcrLimit     int
 	rcrNamespace string
@@ -31,7 +34,7 @@ func NewRCRCleaner(config Config) (*RCRCleaner, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	if config.KClient == nil {
+	if config.KyvernoClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.KClient must not be empty", config)
 	}
 
@@ -44,9 +47,10 @@ func NewRCRCleaner(config Config) (*RCRCleaner, error) {
 	}
 
 	return &RCRCleaner{
-		logger:   config.Logger,
-		kClient:  config.KClient,
-		rcrLimit: config.RCRLimit,
+		logger:         config.Logger,
+		kyvernoClient:  config.KyvernoClient,
+		kyvernoDClient: config.KyvernoDClient,
+		rcrLimit:       config.RCRLimit,
 	}, nil
 }
 
@@ -82,11 +86,14 @@ func (r *RCRCleaner) deleteRCRs(ctx context.Context, rcrs *v1alpha2.ReportChange
 
 	for _, rcr := range rcrs.Items {
 		r.logger.Debugf(ctx, "deleting: %s", rcr.GetName())
-		err := r.kClient.ReportChangeRequests(r.rcrNamespace).Delete(
-			ctx,
-			// apitypes.NamespacedName{Namespace: r.rcrNamespace, Name: rcr.Name}.String(),
-			rcr.GetName(),
-			metav1.DeleteOptions{})
+
+		err := r.kyvernoDClient.DeleteResource(rcr.APIVersion, rcr.Kind, rcr.GetNamespace(), rcr.GetName(), false)
+
+		// err := r.kyvernoClient.ReportChangeRequests(r.rcrNamespace).Delete(
+		// 	ctx,
+		// 	// apitypes.NamespacedName{Namespace: r.rcrNamespace, Name: rcr.Name}.String(),
+		// 	rcr.GetName(),
+		// 	metav1.DeleteOptions{})
 		if err != nil {
 			r.logger.Errorf(ctx, err, "error deleting ReportChangeRequest")
 			// Continue anyway -- we expect to have lots of these as RCRs are deleted after our initial list call.
@@ -98,7 +105,7 @@ func (r *RCRCleaner) deleteRCRs(ctx context.Context, rcrs *v1alpha2.ReportChange
 
 // Lists the ReportChangeRequests in the cluster in the configured watched namespace.
 func (r *RCRCleaner) listRCRs(ctx context.Context) (*v1alpha2.ReportChangeRequestList, error) {
-	rcrs, err := r.kClient.ReportChangeRequests(r.rcrNamespace).List(ctx, metav1.ListOptions{})
+	rcrs, err := r.kyvernoClient.ReportChangeRequests(r.rcrNamespace).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

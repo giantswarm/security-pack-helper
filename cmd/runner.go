@@ -9,6 +9,8 @@ import (
 	"github.com/giantswarm/micrologger"
 	versioned "github.com/kyverno/kyverno/pkg/client/clientset/versioned"
 	api "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/kyverno/v1alpha2"
+	dclient "github.com/kyverno/kyverno/pkg/dclient"
+	"github.com/kyverno/kyverno/pkg/signal"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/rest"
 
@@ -59,14 +61,23 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
 		kyvernoClient = kyverno.KyvernoV1alpha2()
 	}
 
+	stopCh := signal.SetupSignalHandler()
+
+	var kyvernoDClient dclient.Interface
+	{
+		dclient.NewClient(restConfig, 15*time.Minute, stopCh)
+	}
+
 	rcrCleaner, err := cleaner.NewRCRCleaner(cleaner.Config{
-		Logger:       r.logger,
-		KClient:      kyvernoClient,
-		RCRLimit:     r.flag.RCRLimit,
-		RCRNamespace: r.flag.RCRNamespace,
+		Logger:         r.logger,
+		KyvernoClient:  kyvernoClient,
+		KyvernoDClient: kyvernoDClient,
+		RCRLimit:       r.flag.RCRLimit,
+		RCRNamespace:   r.flag.RCRNamespace,
 	})
 	if err != nil {
 		return microerror.Mask(err)
