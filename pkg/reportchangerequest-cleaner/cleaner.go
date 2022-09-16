@@ -8,6 +8,7 @@ import (
 	"github.com/kyverno/kyverno/api/kyverno/v1alpha2"
 	api "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/kyverno/v1alpha2"
 	dclient "github.com/kyverno/kyverno/pkg/dclient"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -90,8 +91,11 @@ func (r *RCRCleaner) deleteRCRs(ctx context.Context, rcrs *v1alpha2.ReportChange
 		// The regular Kyverno client Delete() and DeleteCollection() calls don't seem to work, so we use their "dclient" for now.
 		err := r.kyvernoDClient.DeleteResource(rcr.APIVersion, rcr.Kind, rcr.GetNamespace(), rcr.GetName(), false)
 		if err != nil {
-			r.logger.Errorf(ctx, err, "error deleting ReportChangeRequest")
-			// Continue anyway -- we expect to have lots of these as RCRs are deleted after our initial list call.
+			if !errors.IsNotFound(err) {
+				// Only print a message if something other than a "not found" happens. We expect some will go missing between listing and deleting.
+				r.logger.Errorf(ctx, err, "error deleting ReportChangeRequest")
+			}
+			// Don't stop deleting.
 		}
 	}
 
