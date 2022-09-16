@@ -73,24 +73,11 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 	}
 
 	for {
-		ok, err := rcrCleaner.Check(ctx)
+		err := rcrCleaner.CheckAndDelete(ctx)
 		if err != nil {
-			r.logger.Errorf(ctx, err, "Error listing ReportChangeRequests")
+			r.logger.Errorf(ctx, err, "Error checking ReportChangeRequests")
 			// Next loop.
 			continue
-		}
-		if ok {
-			r.logger.Debugf(ctx, "ReportChangeRequests are below threshold")
-		} else {
-			r.logger.Debugf(ctx, "Deleting ReportChangeRequests")
-			err = rcrCleaner.DeleteRCRs(ctx)
-			if err != nil {
-				r.logger.Errorf(ctx, err, "Error deleting ReportChangeRequests")
-				// Next loop.
-				continue
-			}
-
-			r.logger.Debugf(ctx, "ReportChangeRequests deleted")
 		}
 
 		time.Sleep(time.Second * time.Duration(r.flag.Interval))
