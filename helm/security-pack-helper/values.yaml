@@ -1,12 +1,54 @@
 name: security-pack-helper
 serviceType: managed
 
-# project:
-#   branch: "[[ .Branch ]]"
-#   commit: "[[ .SHA ]]"
+registry:
+  domain: docker.io
 
 image:
-  registry: docker.io
   name: giantswarm/security-pack-helper
-  tag: v0.0.1
   pullPolicy: IfNotPresent
+
+pod:
+  user:
+    id: 1000
+  group:
+    id: 1000
+
+psp:
+  enabled: true
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 200Mi
+  requests:
+    cpu: 200m
+    memory: 200Mi
+
+# Pod securityContext
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# Container securityContext
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  privileged: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+securityPackHelper:
+  # The time in seconds after which periodic checks will be run again.
+  interval: 60
+
+  # Maximum ReportChangeRequests which will be allowed in the cluster before being deleted.
+  rcrLimit: 2000
+
+  # The namespace where ReportChangeRequests will be watched.
+  rcrNamespace: "kyverno"

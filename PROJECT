@@ -1,0 +1,6 @@
+domain: giantswarm
+layout:
+- go.kubebuilder.io/v3
+projectName: security-pack-helper
+repo: github.com/giantswarm/security-pack-helper
+version: "3"

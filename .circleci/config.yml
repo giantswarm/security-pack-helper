@@ -5,26 +5,40 @@ orbs:
 workflows:
   package-and-push-chart-on-tag:
     jobs:
-      # - architect/go-build:
-      #     name: go-build
-      #     binary: security-pack-helper
-      #     resource_class: large
-      #     filters:
-      #       tags:
-      #         only: /^v.*/
+      - architect/go-build:
+          name: go-build
+          binary: security-pack-helper
+          resource_class: large
+          filters:
+            tags:
+              only: /^v.*/
 
-      # - architect/push-to-docker:
-      #     context: "architect"
-      #     name: push-security-pack-helper-to-docker
-      #     image: "docker.io/giantswarm/security-pack-helper"
-      #     username_envar: "DOCKER_USERNAME"
-      #     password_envar: "DOCKER_PASSWORD"
-      #     requires:
-      #       - go-build
-      #     # Needed to trigger job also on git tag.
-      #     filters:
-      #       tags:
-      #         only: /^v.*/
+      - architect/push-to-docker:
+          context: "architect"
+          name: push-security-pack-helper-to-docker
+          image: "quay.io/giantswarm/security-pack-helper"
+          username_envar: "QUAY_USERNAME"
+          password_envar: "QUAY_PASSWORD"
+          requires:
+            - go-build
+          # Needed to trigger job also on git tag.
+          filters:
+            tags:
+              only: /^v.*/
+
+
+      - architect/push-to-docker:
+          context: "architect"
+          name: push-security-pack-helper-to-aliyun
+          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/security-pack-helper"
+          username_envar: "ALIYUN_USERNAME"
+          password_envar: "ALIYUN_PASSWORD"
+          requires:
+            - go-build
+          # Needed to trigger job also on git tag.
+          filters:
+            tags:
+              only: /^v.*/
 
       - architect/push-to-app-catalog:
           context: "architect"
@@ -33,8 +47,8 @@ workflows:
           app_catalog: "giantswarm-playground-catalog"
           app_catalog_test: "giantswarm-playground-test-catalog"
           chart: "security-pack-helper"
-          # requires:
-          #   - push-security-pack-helper-to-docker
+          requires:
+            - push-security-pack-helper-to-docker
           # Trigger job on git tag.
           filters:
             tags:

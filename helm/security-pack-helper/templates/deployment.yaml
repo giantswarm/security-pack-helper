@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "resource.default.name"  . }}
+  namespace: {{ include "resource.default.namespace"  . }}
+  labels:
+    {{- include "labels.common" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "labels.selector" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        {{- include "labels.common" . | nindent 8 }}
+    spec:
+      priorityClassName: giantswarm-critical
+      nodeSelector:
+        node.kubernetes.io/worker: ""
+      serviceAccountName: {{ include "resource.default.name"  . }}
+      securityContext:
+        runAsUser: {{ .Values.pod.user.id }}
+        runAsGroup: {{ .Values.pod.group.id }}
+        {{- with .Values.podSecurityContext }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
+      containers:
+      - name: {{ include "name" . }}
+        image: "{{ .Values.registry.domain }}/{{ .Values.image.name }}:{{ .Chart.Version }}"
+        args:
+          - "--interval={{ .Values.securityPackHelper.interval }}"
+          - "--rcr-limit={{ .Values.securityPackHelper.rcrLimit }}"
+          - "--rcr-namespace={{ .Values.securityPackHelper.rcrNamespace }}"
+        ports:
+        - containerPort: 8080
+          name: metrics
+          protocol: TCP
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        {{- with .Values.securityContext }}
+        securityContext:
+          {{- . | toYaml | nindent 10 }}
+        {{- end }}
