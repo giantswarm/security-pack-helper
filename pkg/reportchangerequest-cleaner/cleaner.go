@@ -8,6 +8,7 @@ import (
 	"github.com/kyverno/kyverno/api/kyverno/v1alpha2"
 	api "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/kyverno/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apitypes "k8s.io/apimachinery/pkg/types"
 )
 
 type Config struct {
@@ -80,7 +81,10 @@ func (r *RCRCleaner) CheckAndDelete(ctx context.Context) error {
 func (r *RCRCleaner) deleteRCRs(ctx context.Context, rcrs *v1alpha2.ReportChangeRequestList) error {
 
 	for _, rcr := range rcrs.Items {
-		err := r.kClient.ReportChangeRequests(r.rcrNamespace).Delete(ctx, rcr.Name, metav1.DeleteOptions{})
+		err := r.kClient.ReportChangeRequests(r.rcrNamespace).Delete(
+			ctx,
+			apitypes.NamespacedName{Namespace: r.rcrNamespace, Name: rcr.Name}.String(),
+			metav1.DeleteOptions{})
 		if err != nil {
 			r.logger.Errorf(ctx, err, "error deleting ReportChangeRequest")
 			// Continue anyway -- we expect to have lots of these as RCRs are deleted after our initial list call.
