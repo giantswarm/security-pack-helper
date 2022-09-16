@@ -8,7 +8,6 @@ import (
 	"github.com/kyverno/kyverno/api/kyverno/v1alpha2"
 	api "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/kyverno/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	apitypes "k8s.io/apimachinery/pkg/types"
 )
 
 type Config struct {
@@ -79,11 +78,14 @@ func (r *RCRCleaner) CheckAndDelete(ctx context.Context) error {
 
 // Deletes a list of ReportChangeRequests. Does not error if individual deletions fail.
 func (r *RCRCleaner) deleteRCRs(ctx context.Context, rcrs *v1alpha2.ReportChangeRequestList) error {
+	r.logger.Debugf(ctx, "deletion namespace: %s", r.rcrNamespace)
 
 	for _, rcr := range rcrs.Items {
+		r.logger.Debugf(ctx, "deleting: %s", rcr.GetName())
 		err := r.kClient.ReportChangeRequests(r.rcrNamespace).Delete(
 			ctx,
-			apitypes.NamespacedName{Namespace: r.rcrNamespace, Name: rcr.Name}.String(),
+			// apitypes.NamespacedName{Namespace: r.rcrNamespace, Name: rcr.Name}.String(),
+			rcr.GetName(),
 			metav1.DeleteOptions{})
 		if err != nil {
 			r.logger.Errorf(ctx, err, "error deleting ReportChangeRequest")
