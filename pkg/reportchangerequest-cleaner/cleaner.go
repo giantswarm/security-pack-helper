@@ -87,13 +87,8 @@ func (r *RCRCleaner) deleteRCRs(ctx context.Context, rcrs *v1alpha2.ReportChange
 	for _, rcr := range rcrs.Items {
 		r.logger.Debugf(ctx, "deleting: %s", rcr.GetName())
 
+		// The regular Kyverno client Delete() and DeleteCollection() calls don't seem to work, so we use their "dclient" for now.
 		err := r.kyvernoDClient.DeleteResource(rcr.APIVersion, rcr.Kind, rcr.GetNamespace(), rcr.GetName(), false)
-
-		// err := r.kyvernoClient.ReportChangeRequests(r.rcrNamespace).Delete(
-		// 	ctx,
-		// 	// apitypes.NamespacedName{Namespace: r.rcrNamespace, Name: rcr.Name}.String(),
-		// 	rcr.GetName(),
-		// 	metav1.DeleteOptions{})
 		if err != nil {
 			r.logger.Errorf(ctx, err, "error deleting ReportChangeRequest")
 			// Continue anyway -- we expect to have lots of these as RCRs are deleted after our initial list call.
