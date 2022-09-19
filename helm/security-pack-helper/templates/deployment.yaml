@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "resource.default.name"  . }}
-  namespace: {{ include "resource.default.namespace"  . }}
+  name: {{ include "resource.default.name" . }}
+  namespace: {{ include "resource.default.namespace" . }}
   labels:
     {{- include "labels.common" . | nindent 4 }}
 spec:
@@ -18,8 +18,14 @@ spec:
         {{- include "labels.common" . | nindent 8 }}
     spec:
       priorityClassName: giantswarm-critical
+      hostNetwork: true
+      tolerations:
+      # Tolerate master taint
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
       nodeSelector:
-        node.kubernetes.io/worker: ""
+        node-role.kubernetes.io/master: ""
       serviceAccountName: {{ include "resource.default.name"  . }}
       securityContext:
         runAsUser: {{ .Values.pod.user.id }}
@@ -33,9 +39,8 @@ spec:
         args:
           - "--interval={{ .Values.securityPackHelper.interval }}"
           - "--rcr-limit={{ .Values.securityPackHelper.rcrLimit }}"
-          - "--rcr-namespace={{ .Values.securityPackHelper.rcrNamespace }}"
-        ports:
-        - containerPort: 8080
+        ports: 
+        - containerPort: {{ .Values.listenPort }}
           name: metrics
           protocol: TCP
         resources:
@@ -44,3 +49,11 @@ spec:
         securityContext:
           {{- . | toYaml | nindent 10 }}
         {{- end }}
+        volumeMounts:
+        - name: certs
+          mountPath: /certs
+          readOnly: true
+      volumes:
+      - name: certs
+        hostPath:
+          path: /etc/kubernetes/ssl/etcd/

@@ -8,6 +8,8 @@ image:
   name: giantswarm/security-pack-helper
   pullPolicy: IfNotPresent
 
+listenPort: 60000
+
 pod:
   user:
     id: 1000
@@ -50,5 +52,10 @@ securityPackHelper:
   # Maximum ReportChangeRequests which will be allowed in the cluster before being deleted.
   rcrLimit: 2000
 
-  # The namespace where ReportChangeRequests will be watched.
-  rcrNamespace: "kyverno"
+etcd:
+  endpoints: ["https://127.0.0.1:2379"]
+  cacertpath: "/certs/server-ca.pem"
+  certpath: "/certs/server-crt.pem"
+  keypath: "/certs/server-key.pem"
+  dialtimeout: "10"
+  prefix: "/giantswarm.io/"

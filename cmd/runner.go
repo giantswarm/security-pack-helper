@@ -7,12 +7,9 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	versioned "github.com/kyverno/kyverno/pkg/client/clientset/versioned"
-	api "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/kyverno/v1alpha2"
-	dclient "github.com/kyverno/kyverno/pkg/dclient"
-	"github.com/kyverno/kyverno/pkg/signal"
 	"github.com/spf13/cobra"
-	"k8s.io/client-go/rest"
+	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/pkg/transport"
 
 	cleaner "github.com/giantswarm/security-pack-helper/pkg/reportchangerequest-cleaner"
 )
@@ -45,42 +42,28 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 
 	r.logger.Debugf(ctx, "Interval: %d", r.flag.Interval)
 	r.logger.Debugf(ctx, "RCR Limit: %d", r.flag.RCRLimit)
-	r.logger.Debugf(ctx, "RCR Namespace: %s", r.flag.RCRNamespace)
 
-	var restConfig *rest.Config
-	{
-		restConfig, err = rest.InClusterConfig()
-		if err != nil {
-			return microerror.Mask(err)
-		}
+	tlsInfo := transport.TLSInfo{
+		TrustedCAFile: r.flag.CACert,
+		CertFile:      r.flag.CertPath,
+		KeyFile:       r.flag.KeyPath,
 	}
 
-	var kyvernoClient api.KyvernoV1alpha2Interface
-	{
-		kyverno, err := versioned.NewForConfig(restConfig)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		kyvernoClient = kyverno.KyvernoV1alpha2()
-	}
-
-	stopCh := signal.SetupSignalHandler()
-
-	var kyvernoDClient dclient.Interface
-	{
-		kyvernoDClient, err = dclient.NewClient(restConfig, 15*time.Minute, stopCh)
-		if err != nil {
-			return microerror.Mask(err)
-		}
+	tlsConfig, err := tlsInfo.ClientConfig()
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
 	rcrCleaner, err := cleaner.NewRCRCleaner(cleaner.Config{
-		Logger:         r.logger,
-		KyvernoClient:  kyvernoClient,
-		KyvernoDClient: kyvernoDClient,
-		RCRLimit:       r.flag.RCRLimit,
-		RCRNamespace:   r.flag.RCRNamespace,
+		Logger:     r.logger,
+		RCRLimit:   r.flag.RCRLimit,
+		EtcdPrefix: r.flag.EtcdPrefix,
+
+		EtcdClientConfig: &clientv3.Config{
+			Endpoints:   r.flag.EtcdEndpoints,
+			DialTimeout: time.Second * time.Duration(r.flag.DialTimeout),
+			TLS:         tlsConfig,
+		},
 	})
 	if err != nil {
 		return microerror.Mask(err)
