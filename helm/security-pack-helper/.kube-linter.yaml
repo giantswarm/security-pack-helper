@@ -10,3 +10,4 @@ checks:
   - "use-namespace"  # Handled in _resource.tpl
   - "exposed-services"  # Needed to scrape metrics when using host network.
   - "dangling-service"  # Seems to be a false positive?
+  - "no-rolling-update-strategy"  # Can't do a rolling update on single-master clusters.

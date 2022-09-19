@@ -99,7 +99,7 @@ func (r *RCRCleaner) deleteResources(ctx context.Context, cli *clientv3.Client) 
 
 // Counts the resources matching the configured prefix stored in etcd.
 func (r *RCRCleaner) countResources(ctx context.Context, cli *clientv3.Client) (*clientv3.GetResponse, error) {
-	resp, err := cli.Get(context.Background(), "/", clientv3.WithPrefix(), clientv3.WithCountOnly())
+	resp, err := cli.Get(context.Background(), r.etcdResourcePrefix, clientv3.WithPrefix(), clientv3.WithCountOnly())
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
