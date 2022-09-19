@@ -9,3 +9,4 @@ checks:
   - "required-label-owner"
   - "use-namespace"  # Handled in _resource.tpl
   - "exposed-services"  # Needed to scrape metrics when using host network.
+  - "dangling-service"  # Seems to be a false positive?
