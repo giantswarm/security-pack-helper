@@ -29,7 +29,7 @@ spec:
     - 'secret'
     - 'configMap'
   allowPrivilegeEscalation: false
-  hostNetwork: false
+  hostNetwork: true
   hostIPC: false
   hostPID: false
 {{- end }}

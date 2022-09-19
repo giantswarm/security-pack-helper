@@ -18,8 +18,14 @@ spec:
         {{- include "labels.common" . | nindent 8 }}
     spec:
       priorityClassName: giantswarm-critical
+      hostNetwork: true
+      tolerations:
+      # Tolerate master taint
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
       nodeSelector:
-        node.kubernetes.io/worker: ""
+        node-role.kubernetes.io/master: ""
       serviceAccountName: {{ include "resource.default.name"  . }}
       securityContext:
         runAsUser: {{ .Values.pod.user.id }}
