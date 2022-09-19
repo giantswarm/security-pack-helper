@@ -28,8 +28,12 @@ spec:
   volumes:
     - 'secret'
     - 'configMap'
+    - 'hostPath'
   allowPrivilegeEscalation: false
   hostNetwork: true
   hostIPC: false
   hostPID: false
+  hostPorts:
+    - min: {{ .Values.listenPort }}
+      max: {{ .Values.listenPort }}
 {{- end }}

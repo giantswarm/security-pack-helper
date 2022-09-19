@@ -50,3 +50,11 @@ spec:
         securityContext:
           {{- . | toYaml | nindent 10 }}
         {{- end }}
+        volumeMounts:
+        - name: certs
+          mountPath: /certs
+          readOnly: true
+      volumes:
+      - name: certs
+        hostPath:
+          path: /etc/kubernetes/ssl/etcd/

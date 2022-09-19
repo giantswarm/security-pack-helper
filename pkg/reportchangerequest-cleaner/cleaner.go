@@ -7,33 +7,25 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"go.etcd.io/etcd/clientv3"
-	// api "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/kyverno/v1alpha2"
-	// dclient "github.com/kyverno/kyverno/pkg/dclient"
 )
 
-// Full path is /giantswarm.io/kyverno.io/reportchangerequests/
+// Full path looks like /giantswarm.io/kyverno.io/reportchangerequests/.
 const ReportChangeRequestPrefix = "kyverno.io/reportchangerequests/"
 
 type Config struct {
-	Logger micrologger.Logger
-	// KyvernoClient    api.KyvernoV1alpha2Interface
-	// KyvernoDClient   dclient.Interface
+	Logger           micrologger.Logger
 	EtcdClientConfig *clientv3.Config
 	EtcdPrefix       string
 
 	RCRLimit int
-	// RCRNamespace string
 }
 
 type RCRCleaner struct {
-	logger micrologger.Logger
-	// kyvernoClient    api.KyvernoV1alpha2Interface
-	// kyvernoDClient   dclient.Interface
-	etcdClientConfig *clientv3.Config
-	etcdPrefix       string
+	logger             micrologger.Logger
+	etcdClientConfig   *clientv3.Config
+	etcdResourcePrefix string
 
 	rcrLimit int
-	// rcrNamespace string
 }
 
 func NewRCRCleaner(config Config) (*RCRCleaner, error) {
@@ -41,17 +33,9 @@ func NewRCRCleaner(config Config) (*RCRCleaner, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	// if config.KyvernoClient == nil {
-	// 	return nil, microerror.Maskf(invalidConfigError, "%T.KClient must not be empty", config)
-	// }
-
 	if config.RCRLimit <= 0 {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RCRLimit must be greater than 0", config)
 	}
-
-	// if config.RCRNamespace == "" {
-	// 	return nil, microerror.Maskf(invalidConfigError, "%T.RCRNamespace must not be empty", config)
-	// }
 
 	if config.EtcdClientConfig == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.EtcdClientConfig must not be empty", config)
@@ -60,14 +44,15 @@ func NewRCRCleaner(config Config) (*RCRCleaner, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.EtcdPrefix has to start and end with a '/'", config)
 	}
 
+	// We hardcode the resource type for this behavior.
+	// We allow otional configured prefixes, but we will enforce deletion of the correct resources.
+	resourcePrefix := config.EtcdPrefix + ReportChangeRequestPrefix
+
 	return &RCRCleaner{
-		logger: config.Logger,
-		// kyvernoClient:    config.KyvernoClient,
-		// kyvernoDClient:   config.KyvernoDClient,
-		etcdClientConfig: config.EtcdClientConfig,
-		etcdPrefix:       config.EtcdPrefix,
-		rcrLimit:         config.RCRLimit,
-		// rcrNamespace:     config.RCRNamespace,
+		logger:             config.Logger,
+		etcdClientConfig:   config.EtcdClientConfig,
+		etcdResourcePrefix: resourcePrefix,
+		rcrLimit:           config.RCRLimit,
 	}, nil
 }
 
@@ -85,12 +70,16 @@ func (r *RCRCleaner) CheckAndDelete(ctx context.Context) error {
 		return microerror.Mask(err)
 	}
 
-	r.logger.Debugf(ctx, "found %d resources matching %s", resp.Count, r.etcdPrefix)
+	r.logger.Debugf(ctx, "found %d resources matching %s", resp.Count, r.etcdResourcePrefix)
 
 	if resp.Count > int64(r.rcrLimit) {
-		r.logger.Debugf(ctx, "Deleting resources")
-		//
-		r.logger.Debugf(ctx, "resources deleted")
+		r.logger.Debugf(ctx, "deleting resources")
+		resp, err := r.deleteResources(ctx, cli)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.Debugf(ctx, "deleted %d resources", resp.Deleted)
 	} else {
 		r.logger.Debugf(ctx, "resources are below threshold")
 	}
@@ -99,19 +88,16 @@ func (r *RCRCleaner) CheckAndDelete(ctx context.Context) error {
 }
 
 // Deletes the resources matching the configured prefix from etcd.
-func (r *RCRCleaner) deleteResources(ctx context.Context, cli *clientv3.Client) error {
-
-	resp, err := cli.Delete(ctx, r.etcdPrefix, clientv3.WithPrefix())
+func (r *RCRCleaner) deleteResources(ctx context.Context, cli *clientv3.Client) (*clientv3.DeleteResponse, error) {
+	resp, err := cli.Delete(ctx, r.etcdResourcePrefix, clientv3.WithPrefix())
 	if err != nil {
-		return microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
-	r.logger.Debugf(ctx, "deleted %d resources", resp.Deleted)
-
-	return nil
+	return resp, nil
 }
 
-// Counts the resources stored in etcd
+// Counts the resources matching the configured prefix stored in etcd.
 func (r *RCRCleaner) countResources(ctx context.Context, cli *clientv3.Client) (*clientv3.GetResponse, error) {
 	resp, err := cli.Get(context.Background(), "/", clientv3.WithPrefix(), clientv3.WithCountOnly())
 	if err != nil {
@@ -120,13 +106,3 @@ func (r *RCRCleaner) countResources(ctx context.Context, cli *clientv3.Client) (
 
 	return resp, nil
 }
-
-// Lists the resources stored in etcd
-// func (r *RCRCleaner) listResources(ctx context.Context, cli *clientv3.Client) (*clientv3.GetResponse, error) {
-// 	resp, err := cli.Get(context.Background(), "/", clientv3.WithPrefix(), clientv3.WithKeysOnly())
-// 	if err != nil {
-// 		return nil, microerror.Mask(err)
-// 	}
-
-// 	return resp, nil
-// }

@@ -3,6 +3,7 @@ package cmd
 import (
 	goflag "flag"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -80,6 +81,10 @@ func (f *flag) Validate(cmd *cobra.Command) error {
 
 	if f.EtcdPrefix == "" {
 		return fmt.Errorf("--%s must not be empty", etcdPrefixFlag)
+	}
+
+	if !strings.HasSuffix(f.EtcdPrefix, "/") || !strings.HasPrefix(f.EtcdPrefix, "/") {
+		return fmt.Errorf("--%s has to start and end with a '/'", etcdPrefixFlag)
 	}
 
 	return err
