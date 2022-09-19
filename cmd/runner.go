@@ -48,7 +48,11 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 		CertFile:      r.flag.CertPath,
 		KeyFile:       r.flag.KeyPath,
 	}
+
 	tlsConfig, err := tlsInfo.ClientConfig()
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	rcrCleaner, err := cleaner.NewRCRCleaner(cleaner.Config{
 		Logger:     r.logger,

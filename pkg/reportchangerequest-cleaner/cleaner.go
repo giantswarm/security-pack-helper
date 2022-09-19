@@ -23,7 +23,7 @@ type Config struct {
 type RCRCleaner struct {
 	logger             micrologger.Logger
 	etcdClientConfig   *clientv3.Config
-	etcdResourcePrefix string
+	etcdResourcePrefix string // Note: this prefix is modified from the one passed in via config.
 
 	rcrLimit int
 }
