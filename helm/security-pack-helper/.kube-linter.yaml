@@ -1,0 +1,4 @@
+checks:
+  addAllBuiltIn: true
+  exclude:
+  - "host-network"  # Needed to connect to local etcd.
