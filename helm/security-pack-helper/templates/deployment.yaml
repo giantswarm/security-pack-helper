@@ -39,7 +39,6 @@ spec:
         args:
           - "--interval={{ .Values.securityPackHelper.interval }}"
           - "--rcr-limit={{ .Values.securityPackHelper.rcrLimit }}"
-          - "--rcr-namespace={{ .Values.securityPackHelper.rcrNamespace }}"
         ports: 
         - containerPort: {{ .Values.listenPort }}
           name: metrics
