@@ -40,8 +40,8 @@ spec:
           - "--interval={{ .Values.securityPackHelper.interval }}"
           - "--rcr-limit={{ .Values.securityPackHelper.rcrLimit }}"
           - "--rcr-namespace={{ .Values.securityPackHelper.rcrNamespace }}"
-        ports:
-        - containerPort: 8080
+        ports: 
+        - containerPort: {{ .Values.listenPort }}
           name: metrics
           protocol: TCP
         resources:

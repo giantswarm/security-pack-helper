@@ -8,6 +8,8 @@ image:
   name: giantswarm/security-pack-helper
   pullPolicy: IfNotPresent
 
+listenPort: 60000
+
 pod:
   user:
     id: 1000
