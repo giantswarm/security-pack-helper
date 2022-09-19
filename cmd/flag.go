@@ -41,7 +41,6 @@ func (f *flag) Init(cmd *cobra.Command) {
 
 	cmd.Flags().IntVar(&f.Interval, intervalFlag, 60, `Interval in seconds to wait between tests. Defaults to 60.`)
 	cmd.Flags().IntVar(&f.RCRLimit, rcrLimitFlag, 2000, `If the number of ReportChangeRequests in the cluster exceeds this number, they will be deleted. Defaults to 2000.`)
-	// cmd.Flags().StringVar(&f.RCRNamespace, rcrNamespaceFlag, "kyverno", `The namespace where ReportChangeRequests will be watched. Defaults to "kyverno".`)
 
 	// ETCD configuration flags
 	cmd.Flags().StringVar(&f.CACert, caCertFlag, "/certs/server-ca.pem", "The path to the root CA certificate to use for etcd connections.")
