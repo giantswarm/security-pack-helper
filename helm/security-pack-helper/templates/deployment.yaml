@@ -15,7 +15,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "labels.common" . | nindent 8 }}
+        {{- include "labels.selector" . | nindent 8 }}
     spec:
       priorityClassName: giantswarm-critical
       hostNetwork: true
