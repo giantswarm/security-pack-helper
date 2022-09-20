@@ -6,7 +6,9 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/prometheus/client_golang/prometheus"
 	"go.etcd.io/etcd/clientv3"
+	// "github.com/prometheus/client_golang/prometheus"
 )
 
 // Full path looks like /giantswarm.io/kyverno.io/reportchangerequests/.
@@ -14,6 +16,7 @@ const ReportChangeRequestPrefix = "kyverno.io/reportchangerequests/"
 
 type Config struct {
 	Logger           micrologger.Logger
+	PromDesc         *prometheus.Desc
 	EtcdClientConfig *clientv3.Config
 	EtcdPrefix       string
 
@@ -22,6 +25,7 @@ type Config struct {
 
 type RCRCleaner struct {
 	logger             micrologger.Logger
+	interventionMetric *prometheus.CounterVec
 	etcdClientConfig   *clientv3.Config
 	etcdResourcePrefix string // Note: this prefix is modified from the one passed in via config.
 
@@ -43,6 +47,13 @@ func NewRCRCleaner(config Config) (*RCRCleaner, error) {
 	if !strings.HasSuffix(config.EtcdPrefix, "/") || !strings.HasPrefix(config.EtcdPrefix, "/") {
 		return nil, microerror.Maskf(invalidConfigError, "%T.EtcdPrefix has to start and end with a '/'", config)
 	}
+
+	// Create a prometheus counter to track how many times we've deleted resources.
+	prometheus.MustRegister(prometheus.NewCounterVec(
+		config.PromDesc,
+		[]string{},
+	))
+	//(config.PromDesc, prometheus.CounterValue, )
 
 	// We hardcode the resource type for this behavior.
 	// We allow otional configured prefixes, but we will enforce deletion of the correct resources.
