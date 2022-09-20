@@ -14,9 +14,38 @@ import (
 // Full path looks like /giantswarm.io/kyverno.io/reportchangerequests/.
 const ReportChangeRequestPrefix = "kyverno.io/reportchangerequests/"
 
+const (
+	metricNamespace        = "security_pack_helper"
+	metricSubsystem        = "interventions"
+	metricInterventionType = "delete_reportchangerequests"
+)
+
+var (
+	interventionCount = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: metricNamespace,
+			Subsystem: metricSubsystem,
+			Name:      "intervention_count",
+			Help:      "The number of times the helper has needed to intervene in the cluster.",
+		},
+		[]string{
+			"intevention_type",
+		},
+	)
+
+	// = prometheus.NewDesc(
+	// 	prometheus.BuildFQName(metricNamespace, metricSubsystem, "count"),
+	// 	"The number of times the helper has needed to intervene in the cluster.",
+	// 	[]string{
+	// 		"intervention_type",
+	// 	},
+	// 	nil,
+	// )
+)
+
 type Config struct {
-	Logger           micrologger.Logger
-	PromDesc         *prometheus.Desc
+	Logger micrologger.Logger
+	// PromDesc         *prometheus.Desc
 	EtcdClientConfig *clientv3.Config
 	EtcdPrefix       string
 
@@ -49,11 +78,7 @@ func NewRCRCleaner(config Config) (*RCRCleaner, error) {
 	}
 
 	// Create a prometheus counter to track how many times we've deleted resources.
-	prometheus.MustRegister(prometheus.NewCounterVec(
-		config.PromDesc,
-		[]string{},
-	))
-	//(config.PromDesc, prometheus.CounterValue, )
+	prometheus.MustRegister(interventionCount)
 
 	// We hardcode the resource type for this behavior.
 	// We allow otional configured prefixes, but we will enforce deletion of the correct resources.
@@ -85,6 +110,9 @@ func (r *RCRCleaner) CheckAndDelete(ctx context.Context) error {
 
 	if resp.Count > int64(r.rcrLimit) {
 		r.logger.Debugf(ctx, "deleting resources")
+
+		interventionCount.WithLabelValues(metricInterventionType).Inc()
+
 		resp, err := r.deleteResources(ctx, cli)
 		if err != nil {
 			return microerror.Mask(err)

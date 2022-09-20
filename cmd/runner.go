@@ -72,8 +72,8 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 	}
 
 	rcrCleaner, err := cleaner.NewRCRCleaner(cleaner.Config{
-		Logger:     r.logger,
-		PromDesc:   k8sResourcesDesc,
+		Logger: r.logger,
+		// PromDesc:   k8sResourcesDesc,
 		RCRLimit:   r.flag.RCRLimit,
 		EtcdPrefix: r.flag.EtcdPrefix,
 
