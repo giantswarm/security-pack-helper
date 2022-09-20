@@ -53,8 +53,8 @@ type Config struct {
 }
 
 type RCRCleaner struct {
-	logger             micrologger.Logger
-	interventionMetric *prometheus.CounterVec
+	logger micrologger.Logger
+	// interventionMetric *prometheus.CounterVec
 	etcdClientConfig   *clientv3.Config
 	etcdResourcePrefix string // Note: this prefix is modified from the one passed in via config.
 

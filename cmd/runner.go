@@ -7,7 +7,6 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/pkg/transport"
@@ -38,21 +37,21 @@ func (r *runner) Run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-const (
-	metricNamespace = "security_pack_helper"
-	metricSubsystem = "interventions"
-)
+// const (
+// 	metricNamespace = "security_pack_helper"
+// 	metricSubsystem = "interventions"
+// )
 
-var (
-	k8sResourcesDesc = prometheus.NewDesc(
-		prometheus.BuildFQName(metricNamespace, metricSubsystem, "count"),
-		"The number of times the helper has needed to intervene in the cluster.",
-		[]string{
-			"intervention_type",
-		},
-		nil,
-	)
-)
+// var (
+// 	k8sResourcesDesc = prometheus.NewDesc(
+// 		prometheus.BuildFQName(metricNamespace, metricSubsystem, "count"),
+// 		"The number of times the helper has needed to intervene in the cluster.",
+// 		[]string{
+// 			"intervention_type",
+// 		},
+// 		nil,
+// 	)
+// )
 
 func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) error {
 	var err error
