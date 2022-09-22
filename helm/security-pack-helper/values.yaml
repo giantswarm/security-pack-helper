@@ -9,7 +9,7 @@ image:
   pullPolicy: IfNotPresent
 
 metrics:
-  containerPort: 60000
+  containerPort: 60100
   service:
     port: 8080
     targetPort: "metrics"
