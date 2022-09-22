@@ -3,10 +3,15 @@ package cmd
 import (
 	"context"
 	"io"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/pkg/transport"
@@ -86,6 +91,11 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 		return microerror.Mask(err)
 	}
 
+	metrics := http.NewServeMux()
+	metrics.Handle("/metrics", promhttp.Handler())
+	// http.ListenAndServe(":60000", nil)
+	go serveMetrics(r.flag, metrics)
+
 	for {
 		err := rcrCleaner.CheckAndDelete(ctx)
 		if err != nil {
@@ -95,5 +105,29 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 		}
 
 		time.Sleep(time.Second * time.Duration(r.flag.Interval))
+	}
+}
+
+func serveMetrics(config *flag, handler http.Handler) {
+	server := &http.Server{
+		Addr:    config.MetricsAddress,
+		Handler: handler,
+	}
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGTERM)
+	go func() {
+		<-sig
+		err := server.Shutdown(context.Background())
+		if err != nil {
+			panic(microerror.JSON(err))
+		}
+	}()
+
+	err := server.ListenAndServe()
+	if err != nil {
+		if err != http.ErrServerClosed {
+			panic(microerror.JSON(err))
+		}
 	}
 }
