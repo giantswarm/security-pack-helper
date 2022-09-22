@@ -39,6 +39,25 @@
                 }
             }
         },
+        "metrics": {
+            "type": "object",
+            "properties": {
+                "containerPort": {
+                    "type": "integer"
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "integer"
+                        },
+                        "targetPort": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "name": {
             "type": "string"
         },
