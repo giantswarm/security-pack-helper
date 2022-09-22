@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `security_pack_helper_interventions_intervention_count` metric exposing the number of times the tool has performed an action, indicated by the `intervention_type` label.
+
 ### Changed
 
 - Push app to control plane catalog.
