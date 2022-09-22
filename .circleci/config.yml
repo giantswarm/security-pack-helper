@@ -15,7 +15,7 @@ workflows:
 
       - architect/push-to-docker:
           context: "architect"
-          name: push-security-pack-helper-to-docker
+          name: push-security-pack-helper-to-quay
           image: "quay.io/giantswarm/security-pack-helper"
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
@@ -43,12 +43,26 @@ workflows:
       - architect/push-to-app-catalog:
           context: "architect"
           executor: "app-build-suite"
-          name: "package and push security-pack-helper chart"
+          name: push-security-pack-helper-to-playground-catalog
           app_catalog: "giantswarm-playground-catalog"
           app_catalog_test: "giantswarm-playground-test-catalog"
           chart: "security-pack-helper"
           requires:
-            - push-security-pack-helper-to-docker
+            - push-security-pack-helper-to-quay
+          # Trigger job on git tag.
+          filters:
+            tags:
+              only: /^v.*/
+              
+      - architect/push-to-app-catalog:
+          context: "architect"
+          executor: "app-build-suite"
+          name: push-security-pack-helper-to-control-plane-catalog
+          app_catalog: "control-plane-catalog"
+          app_catalog_test: "control-plane-test-catalog"
+          chart: "security-pack-helper"
+          requires:
+            - push-security-pack-helper-to-quay
           # Trigger job on git tag.
           filters:
             tags:
