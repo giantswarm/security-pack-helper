@@ -42,22 +42,6 @@ func (r *runner) Run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// const (
-// 	metricNamespace = "security_pack_helper"
-// 	metricSubsystem = "interventions"
-// )
-
-// var (
-// 	k8sResourcesDesc = prometheus.NewDesc(
-// 		prometheus.BuildFQName(metricNamespace, metricSubsystem, "count"),
-// 		"The number of times the helper has needed to intervene in the cluster.",
-// 		[]string{
-// 			"intervention_type",
-// 		},
-// 		nil,
-// 	)
-// )
-
 func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) error {
 	var err error
 
@@ -76,8 +60,7 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 	}
 
 	rcrCleaner, err := cleaner.NewRCRCleaner(cleaner.Config{
-		Logger: r.logger,
-		// PromDesc:   k8sResourcesDesc,
+		Logger:     r.logger,
 		RCRLimit:   r.flag.RCRLimit,
 		EtcdPrefix: r.flag.EtcdPrefix,
 
@@ -93,7 +76,6 @@ func (r *runner) run(ctx context.Context, cmd *cobra.Command, args []string) err
 
 	metrics := http.NewServeMux()
 	metrics.Handle("/metrics", promhttp.Handler())
-	// http.ListenAndServe(":60000", nil)
 	go serveMetrics(r.flag, metrics)
 
 	for {

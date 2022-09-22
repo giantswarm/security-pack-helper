@@ -12,6 +12,6 @@ spec:
   ports:
   - name: metrics
     port: {{ .Values.metrics.service.port }}
-    target-port: {{ .Values.metrics.service.targetPort }}
+    targetPort: {{ .Values.metrics.containerPort }}
   selector:
     {{- include "labels.selector" . | nindent 4 }}

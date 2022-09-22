@@ -8,7 +8,6 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.etcd.io/etcd/clientv3"
-	// "github.com/prometheus/client_golang/prometheus"
 )
 
 // Full path looks like /giantswarm.io/kyverno.io/reportchangerequests/.
@@ -32,20 +31,10 @@ var (
 			"intevention_type",
 		},
 	)
-
-	// = prometheus.NewDesc(
-	// 	prometheus.BuildFQName(metricNamespace, metricSubsystem, "count"),
-	// 	"The number of times the helper has needed to intervene in the cluster.",
-	// 	[]string{
-	// 		"intervention_type",
-	// 	},
-	// 	nil,
-	// )
 )
 
 type Config struct {
-	Logger micrologger.Logger
-	// PromDesc         *prometheus.Desc
+	Logger           micrologger.Logger
 	EtcdClientConfig *clientv3.Config
 	EtcdPrefix       string
 
@@ -53,8 +42,7 @@ type Config struct {
 }
 
 type RCRCleaner struct {
-	logger micrologger.Logger
-	// interventionMetric *prometheus.CounterVec
+	logger             micrologger.Logger
 	etcdClientConfig   *clientv3.Config
 	etcdResourcePrefix string // Note: this prefix is modified from the one passed in via config.
 
