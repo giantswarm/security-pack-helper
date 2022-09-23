@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 0.0.1
+appVersion: 0.0.2
 name: security-pack-helper
 description: Supports Giant Swarm security platform tooling.
 home: https://github.com/giantswarm/security-pack-helper
