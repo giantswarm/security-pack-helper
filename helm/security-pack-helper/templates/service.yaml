@@ -9,8 +9,9 @@ metadata:
     prometheus.io/scrape: "true"
     giantswarm.io/monitoring: "true"
 spec:
-  type: NodePort
   ports:
-  - port: {{ .Values.listenPort }}
+  - name: metrics
+    port: {{ .Values.metrics.service.port }}
+    targetPort: {{ .Values.metrics.containerPort }}
   selector:
     {{- include "labels.selector" . | nindent 4 }}

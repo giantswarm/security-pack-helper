@@ -13,6 +13,8 @@ const (
 	intervalFlag = "interval"
 	rcrLimitFlag = "rcr-limit"
 
+	metricsAddressFlag = "metrics-address"
+
 	// ETCD configuration
 	caCertFlag        = "ca-cert-path"
 	certPathFlag      = "cert-path"
@@ -25,6 +27,8 @@ const (
 type flag struct {
 	Interval int
 	RCRLimit int
+
+	MetricsAddress string
 
 	// ETCD configuration
 	CACert        string
@@ -41,6 +45,8 @@ func (f *flag) Init(cmd *cobra.Command) {
 
 	cmd.Flags().IntVar(&f.Interval, intervalFlag, 60, `Interval in seconds to wait between tests. Defaults to 60.`)
 	cmd.Flags().IntVar(&f.RCRLimit, rcrLimitFlag, 2000, `If the number of ReportChangeRequests in the cluster exceeds this number, they will be deleted. Defaults to 2000.`)
+
+	cmd.Flags().StringVar(&f.MetricsAddress, metricsAddressFlag, ":8080", "The path including port where metrics will be served. Default: ':8080'")
 
 	// ETCD configuration flags
 	cmd.Flags().StringVar(&f.CACert, caCertFlag, "/certs/server-ca.pem", "The path to the root CA certificate to use for etcd connections.")

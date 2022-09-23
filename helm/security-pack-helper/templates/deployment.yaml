@@ -39,8 +39,9 @@ spec:
         args:
           - "--interval={{ .Values.securityPackHelper.interval }}"
           - "--rcr-limit={{ .Values.securityPackHelper.rcrLimit }}"
+          - "--metrics-address=:{{ .Values.metrics.containerPort }}"
         ports: 
-        - containerPort: {{ .Values.listenPort }}
+        - containerPort: {{ .Values.metrics.containerPort }}
           name: metrics
           protocol: TCP
         resources:

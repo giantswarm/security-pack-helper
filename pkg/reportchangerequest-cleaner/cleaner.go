@@ -6,11 +6,32 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/prometheus/client_golang/prometheus"
 	"go.etcd.io/etcd/clientv3"
 )
 
 // Full path looks like /giantswarm.io/kyverno.io/reportchangerequests/.
 const ReportChangeRequestPrefix = "kyverno.io/reportchangerequests/"
+
+const (
+	metricNamespace        = "security_pack_helper"
+	metricSubsystem        = "interventions"
+	metricInterventionType = "delete_reportchangerequests"
+)
+
+var (
+	interventionCount = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: metricNamespace,
+			Subsystem: metricSubsystem,
+			Name:      "intervention_count",
+			Help:      "The number of times the helper has needed to intervene in the cluster.",
+		},
+		[]string{
+			"intevention_type",
+		},
+	)
+)
 
 type Config struct {
 	Logger           micrologger.Logger
@@ -44,6 +65,9 @@ func NewRCRCleaner(config Config) (*RCRCleaner, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.EtcdPrefix has to start and end with a '/'", config)
 	}
 
+	// Create a prometheus counter to track how many times we've deleted resources.
+	prometheus.MustRegister(interventionCount)
+
 	// We hardcode the resource type for this behavior.
 	// We allow otional configured prefixes, but we will enforce deletion of the correct resources.
 	resourcePrefix := config.EtcdPrefix + ReportChangeRequestPrefix
@@ -74,6 +98,9 @@ func (r *RCRCleaner) CheckAndDelete(ctx context.Context) error {
 
 	if resp.Count > int64(r.rcrLimit) {
 		r.logger.Debugf(ctx, "deleting resources")
+
+		interventionCount.WithLabelValues(metricInterventionType).Inc()
+
 		resp, err := r.deleteResources(ctx, cli)
 		if err != nil {
 			return microerror.Mask(err)

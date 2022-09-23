@@ -5,12 +5,15 @@ go 1.18
 require (
 	github.com/giantswarm/microerror v0.4.0
 	github.com/giantswarm/micrologger v1.0.0
+	github.com/prometheus/client_golang v1.12.1
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/pflag v1.0.5
 	go.etcd.io/etcd v3.3.27+incompatible
 )
 
 require (
+	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/coreos/bbolt v1.3.2 // indirect
 	github.com/coreos/etcd v3.3.27+incompatible // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
@@ -36,8 +39,9 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jonboulle/clockwork v0.2.2 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_golang v1.12.1 // indirect
+	github.com/prometheus/client_model v0.2.0 // indirect
+	github.com/prometheus/common v0.32.1 // indirect
+	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/stretchr/testify v1.7.1 // indirect

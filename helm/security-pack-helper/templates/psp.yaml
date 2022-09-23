@@ -34,6 +34,6 @@ spec:
   hostIPC: false
   hostPID: false
   hostPorts:
-    - min: {{ .Values.listenPort }}
-      max: {{ .Values.listenPort }}
+    - min: {{ .Values.metrics.containerPort }}
+      max: {{ .Values.metrics.containerPort }}
 {{- end }}
