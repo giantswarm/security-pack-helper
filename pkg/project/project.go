@@ -5,7 +5,7 @@ var (
 	gitSHA      = "n/a"
 	name        = "security-pack-helper"
 	source      = "https://github.com/giantswarm/security-pack-helper"
-	version     = "0.0.2"
+	version     = "0.0.3-dev"
 )
 
 func Description() string {
