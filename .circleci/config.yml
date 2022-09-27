@@ -47,6 +47,7 @@ workflows:
           app_catalog: "giantswarm-playground-catalog"
           app_catalog_test: "giantswarm-playground-test-catalog"
           chart: "security-pack-helper"
+          persist_chart_archive: true
           requires:
             - push-security-pack-helper-to-quay
           # Trigger job on git tag.
@@ -67,3 +68,14 @@ workflows:
           filters:
             tags:
               only: /^v.*/
+
+      # Run app-test-suite tests.
+      - architect/run-tests-with-ats:
+          name: execute chart tests
+          filters:
+            # Do not trigger the job on merge to main.
+            branches:
+              ignore:
+                - main
+          requires:
+            - push-security-pack-helper-to-playground-catalog
