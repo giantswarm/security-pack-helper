@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update go/text and go/sys
+
 ## [0.0.2] - 2022-09-23
 
 ### Added
@@ -21,6 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation.
 
-[Unreleased]: https://github.com/giantswarm/security-pack-helper/compare/v0.0.2...HEAD
+[unreleased]: https://github.com/giantswarm/security-pack-helper/compare/v0.0.2...HEAD
 [0.0.2]: https://github.com/giantswarm/security-pack-helper/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/giantswarm/security-pack-helper/releases/tag/v0.0.1
