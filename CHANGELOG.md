@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add icon url to chart
 
+### Changed
+
+- Update go/text and go/sys
+
 ## [0.0.2] - 2022-09-23
 
 ### Added
