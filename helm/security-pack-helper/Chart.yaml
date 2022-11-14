@@ -2,6 +2,7 @@ apiVersion: v2
 appVersion: 0.0.2
 name: security-pack-helper
 description: Supports Giant Swarm security platform tooling.
+icon: https://s.giantswarm.io/app-icons/giantswarm/1/dark.svg
 home: https://github.com/giantswarm/security-pack-helper
 # If you have an icon/logo, you should add it to https://github.com/giantswarm/web-assets
 # and set the final URL as a value here and uncomment.
