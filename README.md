@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/giantswarm/security-pack-helper.svg?style=shield)](https://circleci.com/gh/giantswarm/security-pack-helper)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/giantswarm/security-pack-helper/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/giantswarm/security-pack-helper/tree/main)
 
 # security-pack-helper chart
 
